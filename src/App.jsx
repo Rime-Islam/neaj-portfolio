@@ -1,70 +1,74 @@
-import About from "./components/About";
-import Home from "./components/Home";
-import Projects from "./components/Projects";
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import Navbar from "./components/Navbar";
+import Home from "./components/Home";
+import Marquee from "./components/Marquee";
+import About from "./components/About";
+import Process from "./components/Process";
+import Projects from "./components/Projects";
 import Contact from "./components/Contact";
-import './App.css';
-import { useEffect, useRef } from 'react';
-import { gsap, Expo } from 'gsap';
 import Footer from "./components/Footer";
 
+gsap.registerPlugin(ScrollTrigger);
+
 const App = () => {
-  const fsRef = useRef(null);
-  const elemRef = useRef(null);
-  const textRef = useRef(null);
+  const cursorRef = useRef(null);
 
   useEffect(() => {
-    const fs = fsRef.current;
-    const elem = elemRef.current;
-    const text = textRef.current;
-
-    const tl = gsap.timeline();
-    tl.to(fs, {
-      height: 0,
-      duration: 2,
-      ease: Expo.easeInOut,
-    })
-    .to(text, {
-      opacity: 0,
-      y: -20,
-      duration: 1,
-      delay: -1.5, 
-      ease: Expo.easeInOut,
-    })
-      .to(elem, {
-        height: 0,
-        duration: 2.5,
-        delay: -2,
-        ease: Expo.easeInOut,
-      })
-   
-  }, []);
-  
-  return (
-  <div>
-    <div className="bg-[#06031a]">
-      <Navbar></Navbar>
-      <div id="main">
-      <div id="fs" ref={fsRef}>
-        <div ref={textRef} className="text-center text-[#06031a] pt-56 ">
-        <h1 className="inline font-bold text-4xl lg:text-7xl text-white" >NEAJ</h1>
-        <h1 className="inline font-bold text-4xl lg:text-7xl text-[#9acd32]"> MORSHED</h1>
-       <br />
-       <br />
-            <h3 className=" inline font-bold text-2xl lg:text-4xl text-white pl-32 ">is</h3>
-            <h3 className=" inline font-bold text-2xl lg:text-4xl text-white"> a</h3>
-            </div>
-      </div>
-      <div id="elem" ref={elemRef}></div>
-      <Home></Home>
-      <About></About>
-      <Projects></Projects>
-      <Contact></Contact>
-      <Footer></Footer>
-      </div>
+    // Custom Cursor Logic
+    const cursor = cursorRef.current;
     
+    // Default cursor hiding via css in global is optional, we will track mouse
+    const moveCursor = (e) => {
+      gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.1,
+        ease: "power2.out"
+      });
+    };
+
+    window.addEventListener('mousemove', moveCursor);
+
+    // Initial page load animation
+    const tl = gsap.timeline();
+    tl.fromTo(".page-wrapper", 
+      { opacity: 0 }, 
+      { opacity: 1, duration: 1, ease: "power2.out" }
+    );
+
+    return () => {
+      window.removeEventListener('mousemove', moveCursor);
+    };
+  }, []);
+
+  return (
+    <div className="bg-[#050505] text-white overflow-hidden relative selection:bg-brand selection:text-black">
+      {/* Custom Cursor */}
+      <div 
+        ref={cursorRef} 
+        className="fixed top-0 left-0 w-8 h-8 border-2 border-brand rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center transition-transform mix-blend-difference hidden md:flex"
+      >
+        <div className="w-1 h-1 bg-brand rounded-full"></div>
+      </div>
+
+      <div className="page-wrapper opacity-0">
+        <Navbar />
+        
+        <main>
+          <Home />
+          <Marquee />
+          <About />
+          <Process />
+          <Projects />
+          <Contact />
+        </main>
+        
+        <Footer />
+      </div>
     </div>
-  </div>
   );
 };
 
